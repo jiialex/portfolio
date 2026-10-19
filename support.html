@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Jitu Alemayehu</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script defer src="script.js"></script>
+</head>
+<body class="support-page">
+    <nav>
+        <a class="profile" href="index.html">
+            <img src="images/jii.jpg" alt="Jitu Alemayehu">
+            <span>Jitu Alemayehu</span>
+        </a>
+        <div class="navbar">
+            <a href="index.html">Home</a>
+            <button id="theme-toggle" type="button" aria-label="Toggle light/dark mode">🌙</button>
+        </div>
+    </nav>
+
+    <main class="support">
+        <div class="support-grid">
+
+            <!-- Left box: About + Recent supporters -->
+            <section class="card">
+                <h2 class="small">About Jitu Alemayehu</h2>
+                <p class="about-line">Full-Stack Developer specializing in building backend systems and AI-enabled applications with modern technologies.</p>
+                <div class="social">
+                    <a href="https://github.com/jiialex" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="https://linkedin.com/in/jiialex" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://t.me/Jiialex1" target="_blank" rel="noopener" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+                    <a href="mailto:jiialex11@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                </div>
+
+                <hr>
+
+                <h2 class="small">Recent supporters</h2>
+                <div class="supporters">
+                    <i class="fas fa-heart"></i>
+                    <p>Be the first one to support Jitu Alemayehu.</p>
+                </div>
+            </section>
+
+            <!-- Right box: Support form -->
+            <section class="card">
+                <h2>Support Jitu Alemayehu</h2>
+
+                <div class="currency" role="group" aria-label="Currency">
+                    <button type="button" class="cur active" data-cur="ETB">ETB (Birr)</button>
+                    <button type="button" class="cur" data-cur="USD">USD ($)</button>
+                </div>
+
+                <div class="field amount">
+                    <span class="dollar" id="symbol">Br</span>
+                    <input id="amount" type="number" min="1" inputmode="numeric" placeholder="Enter amount">
+                    <button type="button" class="chip-btn" data-add="100">+100</button>
+                    <button type="button" class="chip-btn" data-add="250">+250</button>
+                    <button type="button" class="chip-btn" data-add="500">+500</button>
+                </div>
+
+                <input class="field" type="text" placeholder="Name or @yoursocial">
+                <textarea class="field" rows="5" placeholder="Say something nice..."></textarea>
+
+                <label class="monthly">
+                    <input type="checkbox"> Make this monthly
+                </label>
+
+                <!-- When your Buy Me a Coffee page exists, replace the href below with its link, e.g. https://www.buymeacoffee.com/YOURNAME -->
+                <a class="support-btn" href="https://t.me/Jiialex1" target="_blank" rel="noopener">Support</a>
+                <p class="note">Tap Support to message me on Telegram.</p>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="foot">
+        &copy; Jitu Alemayehu
+    </footer>
+
+    <script>
+        // Currency options: symbol and quick-add amounts
+        var currencies = {
+            ETB: { symbol: "Br", adds: [100, 250, 500] },
+            USD: { symbol: "$",  adds: [10, 25, 50] }
+        };
+        var amount = document.getElementById("amount");
+        var symbol = document.getElementById("symbol");
+        var chips = document.querySelectorAll(".chip-btn");
+        var curButtons = document.querySelectorAll(".cur");
+
+        function setCurrency(code) {
+            var cfg = currencies[code];
+            symbol.textContent = cfg.symbol;
+            chips.forEach(function (btn, i) {
+                btn.dataset.add = cfg.adds[i];
+                btn.textContent = "+" + cfg.adds[i];
+            });
+            curButtons.forEach(function (b) {
+                b.classList.toggle("active", b.dataset.cur === code);
+            });
+            amount.value = "";
+        }
+
+        curButtons.forEach(function (b) {
+            b.addEventListener("click", function () { setCurrency(b.dataset.cur); });
+        });
+
+        // +100 / +250 / +500 (or +10 / +25 / +50) add to the amount box
+        chips.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var current = parseInt(amount.value, 10) || 0;
+                amount.value = current + parseInt(btn.dataset.add, 10);
+            });
+        });
+    </script>
+</body>
+</html>
