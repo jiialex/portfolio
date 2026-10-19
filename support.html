@@ -7,6 +7,40 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script defer src="script.js"></script>
+    <style>
+        /* ---------- Payment popup ---------- */
+        .pay-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: flex-start; justify-content: center; padding: 40px 12px 12px; z-index: 1000; overflow-y: auto; }
+        .pay-overlay.open { display: flex; }
+        .pay-modal { position: relative; width: 100%; max-width: 440px; margin: 36px 0 12px; background: #fff; color: #1a1a1a; border-radius: 20px; padding: 52px 22px 20px; box-shadow: 0 20px 60px rgba(0,0,0,.3); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+        @media (prefers-color-scheme: dark) { .pay-modal { background: #1c1c1c; color: #f0f0f0; } .pay-tab.sel { border-color: #f0f0f0; } .pay-primary { background: #f0f0f0 !important; color: #121212 !important; } }
+        .pay-avatar { position: absolute; top: -36px; left: 50%; transform: translateX(-50%); width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; background: #ddd; }
+        @media (prefers-color-scheme: dark) { .pay-avatar { border-color: #1c1c1c; } }
+        .pay-close { position: absolute; top: 12px; right: 14px; background: none; border: 0; font-size: 28px; line-height: 1; cursor: pointer; color: inherit; opacity: .7; }
+        .pay-close:hover { opacity: 1; }
+        .pay-modal h3 { margin: 0 0 4px; font-size: 24px; text-align: center; font-weight: 500; }
+        .pay-modal h3 b { font-weight: 700; }
+        .pay-total { text-align: center; opacity: .7; margin: 0 0 14px; }
+        .pay-quote { background: rgba(128,128,128,.14); border-radius: 10px; padding: 9px 12px; font-size: 14px; margin-bottom: 14px; word-break: break-word; }
+        .pay-divider { display: flex; align-items: center; gap: 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; opacity: .6; margin: 6px 0 14px; }
+        .pay-divider::before, .pay-divider::after { content: ""; flex: 1; height: 1px; background: rgba(128,128,128,.4); }
+        .pay-input { width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid rgba(128,128,128,.4); border-radius: 12px; background: transparent; color: inherit; font: inherit; margin-bottom: 14px; }
+        .pay-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+        .pay-tab { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; border: 1.5px solid rgba(128,128,128,.35); border-radius: 12px; background: transparent; color: inherit; font: inherit; font-size: 14px; cursor: pointer; opacity: .75; text-align: left; }
+        .pay-tab .ic { font-size: 18px; line-height: 1; }
+        .pay-tab:hover { opacity: 1; }
+        .pay-tab.sel { opacity: 1; border-color: #1a1a1a; font-weight: 600; }
+        .pay-tab:focus-visible { outline: 2px solid #2f7de1; outline-offset: 2px; }
+        .pay-panel { border: 1.5px solid rgba(128,128,128,.3); border-radius: 12px; padding: 14px; margin-bottom: 14px; font-size: 14px; line-height: 1.5; }
+        .pay-panel .info { display: flex; gap: 12px; align-items: flex-start; opacity: .8; }
+        .pay-panel .info .big { font-size: 26px; line-height: 1; }
+        .acct .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,.18); }
+        .acct .row:last-child { border-bottom: 0; }
+        .acct .k { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; opacity: .6; }
+        .acct .v { font-weight: 600; word-break: break-all; text-align: right; }
+        .copy-btn { margin-left: 8px; border: 1px solid rgba(128,128,128,.5); background: transparent; color: inherit; border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+        .pay-primary { display: block; width: 100%; box-sizing: border-box; text-align: center; text-decoration: none; padding: 15px; border: 0; border-radius: 999px; background: #1a1a1a; color: #fff; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; }
+        .pay-foot { font-size: 12.5px; opacity: .65; line-height: 1.5; margin: 14px 0 0; text-align: center; }
+    </style>
 </head>
 <body class="support-page">
     <nav>
@@ -60,16 +94,16 @@
                     <button type="button" class="chip-btn" data-add="500">+500</button>
                 </div>
 
-                <input class="field" type="text" placeholder="Name or @yoursocial">
-                <textarea class="field" rows="5" placeholder="Say something nice..."></textarea>
+                <input class="field" id="supporter-name" type="text" placeholder="Name or @yoursocial">
+                <textarea class="field" id="supporter-msg" rows="5" placeholder="Say something nice..."></textarea>
 
                 <label class="monthly">
-                    <input type="checkbox"> Make this monthly
+                    <input type="checkbox" id="monthly"> Make this monthly
                 </label>
 
-                <!-- When your Buy Me a Coffee page exists, replace the href below with its link, e.g. https://www.buymeacoffee.com/YOURNAME -->
-                <a class="support-btn" href="https://t.me/Jiialex1" target="_blank" rel="noopener">Support</a>
-                <p class="note">Tap Support to message me on Telegram.</p>
+                <button class="support-btn" id="support-btn" type="button">Support</button>
+                <p class="note" id="support-error" role="alert" style="color:#c0392b" hidden>Please enter an amount first.</p>
+                <p class="note">You'll choose how to pay in the next step.</p>
             </section>
 
         </div>
@@ -79,41 +113,238 @@
         &copy; Jitu Alemayehu
     </footer>
 
-    <script>
-        // Currency options: symbol and quick-add amounts
-        var currencies = {
-            ETB: { symbol: "Br", adds: [100, 250, 500] },
-            USD: { symbol: "$",  adds: [10, 25, 50] }
-        };
-        var amount = document.getElementById("amount");
-        var symbol = document.getElementById("symbol");
-        var chips = document.querySelectorAll(".chip-btn");
-        var curButtons = document.querySelectorAll(".cur");
+    <!-- Payment popup -->
+    <div class="pay-overlay" id="pay-overlay" aria-hidden="true">
+        <div class="pay-modal" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+            <img class="pay-avatar" src="images/jii.jpg" alt="">
+            <button class="pay-close" id="pay-close" type="button" aria-label="Close">&times;</button>
+            <h3 id="pay-title">Support <b>Jitu Alemayehu</b></h3>
+            <p class="pay-total">You'll send <strong id="pay-total">&mdash;</strong><span id="pay-monthly"></span></p>
+            <div class="pay-quote" id="pay-quote" hidden></div>
 
-        function setCurrency(code) {
-            var cfg = currencies[code];
-            symbol.textContent = cfg.symbol;
-            chips.forEach(function (btn, i) {
-                btn.dataset.add = cfg.adds[i];
-                btn.textContent = "+" + cfg.adds[i];
-            });
-            curButtons.forEach(function (b) {
-                b.classList.toggle("active", b.dataset.cur === code);
-            });
-            amount.value = "";
+            <div class="pay-divider">Pay with</div>
+            <input class="pay-input" id="pay-email" type="email" placeholder="Email (optional)" autocomplete="email">
+
+            <div class="pay-tabs" id="pay-tabs" role="tablist" aria-label="Payment method"></div>
+            <div class="pay-panel" id="pay-panel" role="tabpanel"></div>
+
+            <div id="pay-action"></div>
+            <p class="pay-foot" id="pay-foot"></p>
+        </div>
+    </div>
+
+    <script>
+    /* =====================================================================
+       EDIT YOUR PAYMENT DETAILS HERE
+       type "account": shows account details to copy, then the supporter
+                       sends the receipt to you on Telegram.
+       type "link":    opens your own hosted payment link / PayPal.me.
+                       {amount} is replaced with the chosen amount.
+       Methods with empty accountNumber / link are hidden automatically.
+       ===================================================================== */
+    var TELEGRAM = "https://t.me/Jiialex1";
+    var ACCOUNT_NAME = "Jitu Alemayehu";   // name on your bank accounts
+    // true  = show every tab, unfinished ones say "not set up yet" (good while testing)
+    // false = hide tabs whose accountNumber / link is still empty (use this when live)
+    var SHOW_UNCONFIGURED = false;
+
+    var METHODS = [
+        // ---- Ethiopia (ETB) ----
+        { id: "cbe",      cur: "ETB", type: "account", icon: "🏦", name: "CBE",      full: "Commercial Bank of Ethiopia", accountNumber: "1000532227357" },
+        { id: "awash",    cur: "ETB", type: "account", icon: "🏦", name: "Awash",    full: "Awash Bank",                  accountNumber: "013201108031800" },
+        { id: "telebirr", cur: "ETB", type: "account", icon: "📱", name: "Telebirr", full: "Telebirr (phone number)",     accountNumber: "0919629551" },
+
+        // ---- Always available (also the only option for USD supporters) ----
+        { id: "telegram", cur: "ANY", type: "telegram", icon: "✈️", name: "Telegram", full: "Telegram" }
+    ];
+
+    /* ---------------- Support form logic ---------------- */
+    var currencies = {
+        ETB: { symbol: "Br", adds: [100, 250, 500] },
+        USD: { symbol: "$",  adds: [10, 25, 50] }
+    };
+    var currentCur = "ETB";
+    var amount = document.getElementById("amount");
+    var symbol = document.getElementById("symbol");
+    var chips = document.querySelectorAll(".chip-btn");
+    var curButtons = document.querySelectorAll(".cur");
+
+    function setCurrency(code) {
+        currentCur = code;
+        var cfg = currencies[code];
+        symbol.textContent = cfg.symbol;
+        chips.forEach(function (btn, i) {
+            btn.dataset.add = cfg.adds[i];
+            btn.textContent = "+" + cfg.adds[i];
+        });
+        curButtons.forEach(function (b) {
+            b.classList.toggle("active", b.dataset.cur === code);
+        });
+        amount.value = "";
+    }
+    curButtons.forEach(function (b) {
+        b.addEventListener("click", function () { setCurrency(b.dataset.cur); });
+    });
+    chips.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var current = parseInt(amount.value, 10) || 0;
+            amount.value = current + parseInt(btn.dataset.add, 10);
+        });
+    });
+
+    /* ---------------- Popup logic ---------------- */
+    var overlay = document.getElementById("pay-overlay");
+    var tabsBox = document.getElementById("pay-tabs");
+    var panel = document.getElementById("pay-panel");
+    var action = document.getElementById("pay-action");
+    var foot = document.getElementById("pay-foot");
+    var order = {};
+    var usable = [];
+
+    function el(tag, cls, text) {
+        var e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text !== undefined) e.textContent = text;
+        return e;
+    }
+    function money() {
+        return currencies[order.cur].symbol + (order.cur === "ETB" ? " " : "") + order.amount.toLocaleString();
+    }
+    function configured(m) {
+        if (m.type === "account") return !!m.accountNumber;
+        if (m.type === "link") return !!m.link;
+        return true;
+    }
+    function telegramLink(text) { return TELEGRAM + "?text=" + encodeURIComponent(text); }
+    function who() {
+        var email = document.getElementById("pay-email").value.trim();
+        return (order.name ? ". My name: " + order.name : "") + (email ? ". Email: " + email : "");
+    }
+
+    function openPopup() {
+        var value = parseInt(amount.value, 10) || 0;
+        var err = document.getElementById("support-error");
+        if (value < 1) { err.hidden = false; amount.focus(); return; }
+        err.hidden = true;
+
+        order = {
+            amount: value, cur: currentCur,
+            name: document.getElementById("supporter-name").value.trim(),
+            msg: document.getElementById("supporter-msg").value.trim(),
+            monthly: document.getElementById("monthly").checked
+        };
+        document.getElementById("pay-total").textContent = money();
+        document.getElementById("pay-monthly").textContent = order.monthly ? " every month" : "";
+        var quote = document.getElementById("pay-quote");
+        if (order.name || order.msg) {
+            quote.textContent = (order.name ? order.name + (order.msg ? ": " : "") : "") + order.msg;
+            quote.hidden = false;
+        } else { quote.hidden = true; }
+
+        usable = METHODS.filter(function (m) {
+            if (m.cur !== "ANY" && m.cur !== order.cur) return false;
+            return SHOW_UNCONFIGURED || configured(m);
+        });
+        tabsBox.innerHTML = "";
+        usable.forEach(function (m) {
+            var b = el("button", "pay-tab");
+            b.type = "button"; b.setAttribute("role", "tab"); b.dataset.id = m.id;
+            b.appendChild(el("span", "ic", m.icon));
+            b.appendChild(el("span", "", m.name));
+            b.addEventListener("click", function () { selectTab(m); });
+            tabsBox.appendChild(b);
+        });
+        selectTab(usable.filter(configured)[0] || usable[0]);
+
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        overlay.scrollTop = 0;
+    }
+
+    function closePopup() {
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    function info(icon, text) {
+        var d = el("div", "info");
+        d.appendChild(el("span", "big", icon));
+        d.appendChild(el("span", "", text));
+        return d;
+    }
+    function link(label, href) {
+        var a = el("a", "pay-primary", label);
+        a.href = href; a.target = "_blank"; a.rel = "noopener";
+        return a;
+    }
+
+    function selectTab(m) {
+        Array.prototype.forEach.call(tabsBox.children, function (t) {
+            var on = t.dataset.id === m.id;
+            t.classList.toggle("sel", on);
+            t.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        panel.innerHTML = ""; action.innerHTML = "";
+
+        if (!configured(m)) {
+            panel.appendChild(info("🛠️", m.full + " isn't set up yet. Please use Telegram and we'll arrange it."));
+            var tgm = METHODS[METHODS.length - 1];
+            var b = el("button", "pay-primary", "Use Telegram instead");
+            b.type = "button";
+            b.addEventListener("click", function () { selectTab(tgm); });
+            action.appendChild(b);
+            foot.textContent = "";
+            return;
         }
 
-        curButtons.forEach(function (b) {
-            b.addEventListener("click", function () { setCurrency(b.dataset.cur); });
-        });
-
-        // +100 / +250 / +500 (or +10 / +25 / +50) add to the amount box
-        chips.forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                var current = parseInt(amount.value, 10) || 0;
-                amount.value = current + parseInt(btn.dataset.add, 10);
+        if (m.type === "account") {
+            var box = el("div", "acct");
+            [["Bank / wallet", m.full], ["Account name", ACCOUNT_NAME], ["Account / phone", m.accountNumber], ["Amount", money()]]
+            .forEach(function (r) {
+                var row = el("div", "row");
+                row.appendChild(el("span", "k", r[0]));
+                var right = el("span");
+                right.appendChild(el("span", "v", r[1]));
+                if (r[0] === "Account / phone") {
+                    var c = el("button", "copy-btn", "Copy");
+                    c.type = "button";
+                    c.addEventListener("click", function () {
+                        if (navigator.clipboard) navigator.clipboard.writeText(m.accountNumber);
+                        c.textContent = "Copied ✓";
+                        setTimeout(function () { c.textContent = "Copy"; }, 1500);
+                    });
+                    right.appendChild(c);
+                }
+                row.appendChild(right);
+                box.appendChild(row);
             });
-        });
+            panel.appendChild(box);
+            var note = "Hi Jitu, I just supported you with " + money() + " via " + m.full + who() + ". Receipt attached.";
+            action.appendChild(link("I've paid — send receipt", telegramLink(note)));
+            foot.textContent = "Send the money in your banking app first, then tap the button and attach your receipt screenshot on Telegram.";
+
+        } else if (m.type === "link") {
+            panel.appendChild(info("↗️", "You'll be taken to " + m.full + " to securely complete your payment."));
+            action.appendChild(link("Pay " + money(), m.link.replace("{amount}", order.amount)));
+            foot.textContent = "Payment is completed on " + m.full + "'s own secure page. No card details are entered on this site.";
+
+        } else {
+            panel.appendChild(info("✈️", "Message me on Telegram and we'll agree on the easiest way for you to pay."));
+            var msg = "Hi Jitu, I'd like to support you with " + money() + (order.monthly ? " monthly" : "") + who() + ". What payment options do you have?";
+            action.appendChild(link("Open Telegram", telegramLink(msg)));
+            foot.textContent = "Any bank, mobile money or other method that works for you.";
+        }
+    }
+
+    
+    document.getElementById("support-btn").addEventListener("click", openPopup);
+    document.getElementById("pay-close").addEventListener("click", closePopup);
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) closePopup(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePopup(); });
+
+    
     </script>
 </body>
 </html>
