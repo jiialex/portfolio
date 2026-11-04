@@ -716,6 +716,8 @@ nav {
 .pc-tech { display: flex; gap: 8px; flex-wrap: wrap; }
 .pc-tech span { color: var(--muted); padding: 3px 10px; font-size: 13px; }
 .pc-link { margin-top: auto; padding-top: 6px; font-family: system-ui, sans-serif; font-weight: 600; color: var(--link-hover); text-decoration: none; }
+.pc-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; }
+.pc-links .pc-link { margin-top: 0; }
 .pc-link:hover { text-decoration: underline; }
 .pc-link.muted { color: var(--muted); }
 @media (max-width: 640px) { .proj-grid { grid-template-columns: 1fr; } }
